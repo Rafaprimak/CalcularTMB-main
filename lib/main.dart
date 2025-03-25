@@ -32,6 +32,7 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
 
   double? _tmb;
   bool _isMulher = true;
+  double _buttonOpacity = 1.0;
 
   void _calcularTMB(){
     final double idade = double.tryParse(_idadeController.text) ?? 0.0;
@@ -109,9 +110,52 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
                 Text('Masculino'),
               ],
             ),
-            ElevatedButton(onPressed: _calcularTMB, child: Text('Calcular TMB')),
+            // Button with fade effect
+            InkWell(
+              onTap: () {
+                setState(() {
+                  _buttonOpacity = 0.5;
+                });
+                _calcularTMB();
+                Future.delayed(Duration(milliseconds: 300), () {
+                  setState(() {
+                    _buttonOpacity = 1.0;
+                  });
+                });
+              },
+              child: AnimatedOpacity(
+                opacity: _buttonOpacity,
+                duration: Duration(milliseconds: 300),
+                child: ElevatedButton(
+                  onPressed: null, // Handling in InkWell
+                  child: Text('Calcular TMB'),
+                ),
+              ),
+            ),
             SizedBox(height: 20),
-            ElevatedButton(onPressed: _exibirResultado, child: Text('Ver Resultado')),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) => 
+                      TelaResultado(tmb: _tmb),
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                      var begin = Offset(1.0, 0.0);
+                      var end = Offset.zero;
+                      var curve = Curves.ease;
+                      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                      return SlideTransition(
+                        position: animation.drive(tween),
+                        child: child,
+                      );
+                    },
+                    transitionDuration: Duration(milliseconds: 500),
+                  ),
+                );
+              }, 
+              child: Text('Ver Resultado')
+            ),
           ],
         ),
       ),
